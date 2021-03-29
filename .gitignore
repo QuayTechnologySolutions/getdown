@@ -5,3 +5,4 @@
 /target/
 core/src/main/java/com/threerings/getdown/data/Build.java
 /.idea/
+*.iml
