@@ -656,6 +656,7 @@ public class Application
         // read some miscellaneous configurations
         _strictComments = config.getBoolean("strict_comments");
         _allowOffline = config.getBoolean("allow_offline");
+        _doNotUseProxy = config.getBoolean("do_not_use_proxy");
         _revalidatePolicy = config.getEnum(
             "revalidate_policy", RevalidatePolicy.class, RevalidatePolicy.AFTER_UPDATE);
         int tpSize = SysProps.threadPoolSize();
@@ -939,6 +940,14 @@ public class Application
     }
 
     /**
+     * Returns true if the app should bypass proxy update logic.
+     */
+    public boolean doNotUseProxy ()
+    {
+        return _doNotUseProxy;
+    }
+
+    /**
      * Attempts to redownload the {@code getdown.txt} file based on information parsed from a
      * previous call to {@link #init}.
      */
@@ -978,7 +987,7 @@ public class Application
             // the application as is; next time the app runs when connected to the internet, it
             // will have to rediscover that it needs updating and reattempt to update itself
             if (_allowOffline) {
-                log.warning("Failed to update digest files.  Attempting offline operaton.", ex);
+                log.warning("Failed to update digest files.  Attempting offline operation.", ex);
                 if (!FileUtil.deleteHarder(getLocalPath(VERSION_FILE))) {
                     log.warning("Deleting version.txt failed.  This probably isn't going to work.");
                 }
@@ -1775,6 +1784,7 @@ public class Application
     protected String _dockIconPath;
     protected boolean _strictComments;
     protected boolean _allowOffline;
+    protected boolean _doNotUseProxy;
     protected int _maxConcDownloads;
 
     protected String _trackingURL;

@@ -186,13 +186,6 @@ public abstract class Getdown
         }
 
         _dead = false;
-        // if we fail to detect a proxy, but we're allowed to run offline, then go ahead and
-        // run the app anyway because we're prepared to cope with not being able to update
-        if (detectProxy() || _app.allowOffline()) getdown();
-        else requestProxyInfo(false);
-    }
-
-    protected boolean detectProxy () {
         // first we have to initialize our application to get the appbase URL, etc.
         log.info("Checking whether we need to use a proxy...");
         try {
@@ -201,6 +194,28 @@ public abstract class Getdown
             // no worries
         }
 
+        if (_app.allowOffline()) {
+            getdown();
+        } else if (_app.doNotUseProxy()) {
+            // if skip Proxy Detection is configured, first check for if we have connection to
+            // getdown server. Upon success - proceed with getdown launch;
+            // otherwise end the application by indicating network connection issues
+            final URL configURL = _app.getConfigResource().getRemote();
+            if (ProxyUtil.canLoadWithoutProxy(configURL, 2)) {
+                getdown();
+            } else {
+                fail(MessageUtil.compose("m.init_error", "m.network_connection_error", _ifc.installError));
+            }
+        } else if (detectProxy()) {
+            // if we fail to detect a proxy, but we're allowed to run offline, then go ahead and
+            // run the app anyway because we're prepared to cope with not being able to update
+            getdown();
+        } else {
+            requestProxyInfo(false);
+        }
+    }
+
+    protected boolean detectProxy () {
         boolean tryNoProxy = SysProps.tryNoProxyFirst();
         if (!tryNoProxy && ProxyUtil.autoDetectProxy(_app)) {
             return true;
