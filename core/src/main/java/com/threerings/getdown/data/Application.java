@@ -8,10 +8,8 @@ package com.threerings.getdown.data;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.Proxy;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -29,7 +27,6 @@ import com.threerings.getdown.util.*;
 import com.threerings.getdown.util.Base64;
 
 import static com.threerings.getdown.Log.log;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Parses and provide access to the information contained in the {@code getdown.txt}
@@ -52,6 +49,9 @@ public class Application
 
     /** A special classname that means 'use -jar code.jar' instead of a classname. */
     public static final String MANIFEST_CLASS = "manifest";
+
+    /** The name for a custom file, added to Custom JVM directory, that contains Custom JVM version string */
+    public static final String GETDOWN_CUSTOM_JVM_VERSION_FILENAME = "getdownVersion.properties";
 
     /** Used to communicate information about the UI displayed when updating the application. */
     public static final class UpdateInterface
@@ -494,6 +494,13 @@ public class Application
     }
 
     /**
+     * @return Java version for the required local VM installation.
+     */
+    public String javaRequiredCustomJvmVersion () {
+        return _javaRequiredCustomJvmVersion;
+    }
+
+    /**
      * @return a resource for a zip file containing a Java VM that can be downloaded to use in
      * place of the installed VM (in the case where the VM that launched Getdown does not meet the
      * application's version requirements) or null if no VM is available for this platform.
@@ -691,6 +698,8 @@ public class Application
 
         // used only in conjunction with java_location
         _javaLocalDir = getLocalPath(config.getString("java_local_dir", LaunchUtil.LOCAL_JAVA_DIR));
+
+        _javaRequiredCustomJvmVersion = config.getString("java_required_custom_jvm_version", _javaRequiredCustomJvmVersion);
     }
 
     /**
@@ -870,6 +879,10 @@ public class Application
      */
     public boolean haveValidJavaVersion ()
     {
+        if (_javaRequiredCustomJvmVersion != null) {
+            return haveValidCustomJVM();
+        }
+
         // if we're doing no version checking, then yay!
         if (_javaMinVersion == 0 && _javaMaxVersion == 0) return true;
 
@@ -919,6 +932,27 @@ public class Application
                         "error", re, "needed", _javaMinVersion);
             return true;
         }
+    }
+
+    private boolean haveValidCustomJVM() {
+        Resource vmjar = getJavaVMResource();
+        if (vmjar != null) {
+            if (!_javaLocalDir.exists()) {
+                log.warning("Local JVM directory %s does not exist - custom JVM should be updated.",
+                    _javaLocalDir);
+                return false;
+            }
+
+            File versionFile = new File(_javaLocalDir, GETDOWN_CUSTOM_JVM_VERSION_FILENAME);
+            if (!versionFile.exists()) {
+                log.warning("Unpacked JVM missing '%s' file - custom JVM should be updated.",
+                    GETDOWN_CUSTOM_JVM_VERSION_FILENAME);
+                return false;
+            }
+            return _javaRequiredCustomJvmVersion.equals(
+                VersionUtil.readCustomJvmVersion(versionFile));
+        }
+        return false;
     }
 
     /**
@@ -1802,6 +1836,7 @@ public class Application
     protected boolean _javaExactVersionRequired;
     protected String _javaLocation;
     protected File _javaLocalDir;
+    protected String _javaRequiredCustomJvmVersion = null;
 
     protected List<Resource> _codes = new ArrayList<>();
     protected List<Resource> _resources = new ArrayList<>();

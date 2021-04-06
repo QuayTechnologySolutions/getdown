@@ -349,6 +349,7 @@ public abstract class Getdown
 
             _toInstallResources = new HashSet<>();
             _readyToInstall = false;
+            _customJavaUpdateCount = 0;
 
             // setStep(Step.START);
             for (int ii = 0; ii < MAX_LOOPS; ii++) {
@@ -525,9 +526,17 @@ public abstract class Getdown
     protected void updateJava ()
         throws IOException
     {
+        _customJavaUpdateCount++;
+        if (_app.javaRequiredCustomJvmVersion() != null && _customJavaUpdateCount > 1) {
+            throw new IOException(MessageUtil.compose("m.custom_java_download_failed", _ifc.installError));
+        }
+
         Resource vmjar = _app.getJavaVMResource();
         if (vmjar == null) {
-            throw new IOException("m.java_download_failed");
+            final String msg = _app.javaRequiredCustomJvmVersion() != null ?
+                MessageUtil.compose("m.custom_java_download_failed", _ifc.installError)
+                : "m.java_download_failed";
+            throw new IOException(msg);
         }
 
         // on Windows, if the local JVM is in use, we will not be able to replace it with an
@@ -538,6 +547,9 @@ public abstract class Getdown
         if (javaDll.exists()) {
             if (!javaDll.renameTo(javaDll)) {
                 log.info("Cannot update local Java VM as it is in use.");
+                if (_app.javaRequiredCustomJvmVersion() != null) {
+                    fail("m.java_download_failed_in_use");
+                }
                 return;
             }
         }
@@ -554,7 +566,10 @@ public abstract class Getdown
         try {
             vmjar.install(true);
         } catch (IOException ioe) {
-            throw new IOException("m.java_unpack_failed", ioe);
+            final String msg = _app.javaRequiredCustomJvmVersion() != null ?
+                MessageUtil.compose("m.custom_java_download_failed", _ifc.installError)
+                : "m.java_unpack_failed";
+            throw new IOException(msg, ioe);
         }
 
         // these only run on non-Windows platforms, so we use Unix file separators
@@ -570,6 +585,13 @@ public abstract class Getdown
             Runtime.getRuntime().exec(command);
         } catch (Exception e) {
             log.warning("Failed to regenerate .jsa dump file", "error", e);
+        }
+
+        if (_app.javaRequiredCustomJvmVersion() != null) {
+            final File localJvmFile = vmjar.getLocal();
+            localJvmFile.delete();
+            final File localJvmTagFile = new File(localJvmFile.getAbsolutePath()+"v");
+            localJvmTagFile.delete();
         }
 
         reportTrackingEvent("jvm_complete", -1);
@@ -1153,6 +1175,7 @@ public abstract class Getdown
 
     protected Set<Resource> _toInstallResources;
     protected boolean _readyToInstall;
+    protected int _customJavaUpdateCount = 0;
 
     protected boolean _enableTracking = true;
     protected int _reportedProgress = 0;

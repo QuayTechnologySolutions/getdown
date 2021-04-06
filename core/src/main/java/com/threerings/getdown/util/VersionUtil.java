@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -97,6 +98,21 @@ public final class VersionUtil
         } catch (Exception e) {
             log.warning("Failed to read version from 'release' file", "file", relfile, e);
             return 0L;
+        }
+    }
+
+    /**
+     * Reads the version from the custom Getdown version file added to a JVM.
+     */
+    public static String readCustomJvmVersion (File versionFile)
+    {
+        Properties javaVersionProperties = new Properties();
+        try (FileInputStream fileInputStream = new FileInputStream(versionFile)) {
+            javaVersionProperties.load(fileInputStream);
+            return javaVersionProperties.getProperty("JAVA_VERSION");
+        } catch (Exception e) {
+            log.warning("Failed to read version from custom version file", "file", versionFile, e);
+            return "";
         }
     }
 
