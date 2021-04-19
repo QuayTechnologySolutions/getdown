@@ -578,13 +578,15 @@ public abstract class Getdown
         FileUtil.makeExecutable(new File(javaLocalDir, "lib/amd64/jspawnhelper"));
 
         // lastly regenerate the .jsa dump file that helps Java to start up faster
-        String vmpath = LaunchUtil.getJVMBinaryPath(javaLocalDir, false);
-        String[] command = { vmpath, "-Xshare:dump" };
-        try {
-            log.info("Regenerating classes.jsa for " + vmpath + "...");
-            Runtime.getRuntime().exec(command);
-        } catch (Exception e) {
-            log.warning("Failed to regenerate .jsa dump file", "error", e);
+        if (!_app.disableJsaRegeneration()) {
+            String vmpath = LaunchUtil.getJVMBinaryPath(javaLocalDir, false);
+            String[] command = {vmpath, "-Xshare:dump"};
+            try {
+                log.info("Regenerating classes.jsa for " + vmpath + "...");
+                Runtime.getRuntime().exec(command);
+            } catch (Exception e) {
+                log.warning("Failed to regenerate .jsa dump file", "error", e);
+            }
         }
 
         if (_app.javaRequiredCustomJvmVersion() != null) {

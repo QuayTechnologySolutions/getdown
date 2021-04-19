@@ -526,6 +526,13 @@ public class Application
     }
 
     /**
+     * @return indicated disabling of .jsa cache regeneration after custom JVM installation
+     */
+    public boolean disableJsaRegeneration() {
+        return _javaDisableJsaRegeneration;
+    }
+
+    /**
      * Returns a resource that can be used to download an archive containing all files belonging to
      * the application.
      */
@@ -700,6 +707,7 @@ public class Application
         _javaLocalDir = getLocalPath(config.getString("java_local_dir", LaunchUtil.LOCAL_JAVA_DIR));
 
         _javaRequiredCustomJvmVersion = config.getString("java_required_custom_jvm_version", _javaRequiredCustomJvmVersion);
+        _javaDisableJsaRegeneration = config.getBoolean("java_disable_jsa_regeneration");
     }
 
     /**
@@ -1837,6 +1845,7 @@ public class Application
     protected String _javaLocation;
     protected File _javaLocalDir;
     protected String _javaRequiredCustomJvmVersion = null;
+    protected boolean _javaDisableJsaRegeneration;
 
     protected List<Resource> _codes = new ArrayList<>();
     protected List<Resource> _resources = new ArrayList<>();
