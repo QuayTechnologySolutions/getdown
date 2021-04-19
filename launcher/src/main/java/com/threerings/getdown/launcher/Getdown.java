@@ -34,10 +34,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLayeredPane;
+import javax.swing.*;
 
 import com.samskivert.swing.util.SwingUtil;
 import com.threerings.getdown.data.Application;
@@ -969,7 +966,15 @@ public abstract class Getdown
     protected void fail (String message)
     {
         _dead = true;
-        setStatusAsync(message, stepToGlobalPercent(0), -1L, true);
+//         create a panel to display failure message
+        FailurePanel failurePanel = new FailurePanel(_msgs, message);
+
+        failurePanel.pack();
+        SwingUtil.centerWindow(failurePanel);
+        failurePanel.setVisible(true);
+        failurePanel.setState(JFrame.NORMAL);
+        failurePanel.requestFocus();
+
     }
 
     /**

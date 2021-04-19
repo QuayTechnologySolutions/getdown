@@ -180,7 +180,7 @@ public class Application
             this.errorBackground = config.getString("ui.error_background");
 
             // On an installation error, where do we point the user.
-            String installError = config.getUrl("ui.install_error", null);
+            String installError = config.getString("ui.install_error", null);
             this.installError = (installError == null) ?
                 "m.default_install_error" : MessageUtil.taint(installError);
 
