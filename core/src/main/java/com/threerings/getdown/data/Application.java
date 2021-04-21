@@ -64,6 +64,7 @@ public class Application
         {
             UPDATE_JAVA(10),
             VERIFY_METADATA(15, 65, 95),
+            VERIFY_GETDOWN(20, 65),
             DOWNLOAD(40),
             PATCH(60),
             VERIFY_RESOURCES(70, 97),
@@ -533,6 +534,49 @@ public class Application
     }
 
     /**
+     * @return required Getdown version per set property in Getdown.txt file
+     */
+    public String getReqGetdownVersion() {
+        if (_reqGetdownVersion == null || StringUtil.isBlank(_reqGetdownVersion)) {
+            return null;
+        }
+        return _reqGetdownVersion;
+    }
+
+    /**
+     * @return a resource that can be used to download Getdown updater/installer from app server
+     */
+    public Resource getGetdownUpdateResource() {
+        if (StringUtil.isBlank(_getdownUpdateLocation)) {
+            return null;
+        }
+
+        // extract file name from Getdown Update location from URL
+        final String localUpdateFile = !_getdownUpdateLocation.contains("/") ? _getdownUpdateLocation
+            : _getdownUpdateLocation.substring(_getdownUpdateLocation.lastIndexOf('/') + 1);
+        try {
+            URL remote = new URL(createVAppBase(_targetVersion), encodePath(_getdownUpdateLocation));
+            return new Resource(localUpdateFile, remote, getLocalPath(localUpdateFile),
+                EnumSet.of(Resource.Attr.EXEC));
+        } catch (Exception e) {
+            log.warning("Failed to create Getdown Update resource", "updatefile", localUpdateFile,
+                "appbase", _appbase, "getdownUpdateLoc", _getdownUpdateLocation, "error", e);
+            return null;
+        }
+    }
+
+    /**
+     * @return a resource that can be used to download Getdown updater/installer from app server
+     */
+    public List<String> getGetdownUpdaterArguments() {
+        final List<String> result = new ArrayList<>();
+        if (_getdownUpdateArguments != null && !_getdownUpdateArguments.isEmpty()) {
+            Collections.addAll(result, _getdownUpdateArguments.split(" "));
+        }
+        return result;
+    }
+
+    /**
      * Returns a resource that can be used to download an archive containing all files belonging to
      * the application.
      */
@@ -613,6 +657,7 @@ public class Application
         Config config = readConfig(_envc, checkPlatform);
         initBase(config);
         initJava(config);
+        initGetdownUpdater(config);
         initTracking(config);
         initResources(config);
         initCleanupPatterns(config);
@@ -708,6 +753,18 @@ public class Application
 
         _javaRequiredCustomJvmVersion = config.getString("java_required_custom_jvm_version", _javaRequiredCustomJvmVersion);
         _javaDisableJsaRegeneration = config.getBoolean("java_disable_jsa_regeneration");
+    }
+
+    /**
+     * Reads the Getdown Updater parameter from {@code config} into this instance. Includes required
+     * Getdown version, location on Getdown Updater resource on the server and command line arguments
+     * for running updater.
+     */
+    public void initGetdownUpdater (Config config) {
+
+        _reqGetdownVersion = config.getString("getdown_required_version");
+        _getdownUpdateLocation = config.getString("getdown_update_location");
+        _getdownUpdateArguments = config.getString("getdown_update_arguments");
     }
 
     /**
@@ -1837,6 +1894,10 @@ public class Application
     protected String _trackingGAHash;
     protected long _trackingStart;
     protected int _trackingId;
+
+    protected String _reqGetdownVersion = null;
+    protected String _getdownUpdateLocation;
+    protected String _getdownUpdateArguments;
 
     protected String _javaVersionProp = "java.version";
     protected String _javaVersionRegex = "(\\d+)(?:\\.(\\d+)(?:\\.(\\d+)(_\\d+)?)?)?";

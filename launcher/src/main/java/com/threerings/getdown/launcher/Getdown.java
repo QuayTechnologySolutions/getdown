@@ -367,6 +367,10 @@ public abstract class Getdown
                     continue;
                 }
 
+                log.info("Attempting to update Getdown itself");
+                setStep(Step.VERIFY_GETDOWN);
+                verifyAndUpdateGetdown();
+
                 // now verify (and download) our resources...
                 setStep(Step.VERIFY_RESOURCES);
                 setStatusAsync("m.validating", -1, -1L, false);
@@ -514,6 +518,45 @@ public abstract class Getdown
             log.warning("Failed to load image", "path", imgpath, "error", ioe2);
             return null;
         }
+    }
+
+    /**
+     *  Verifies if version of currently running Getdown is same as set in Getdown.txt.
+     *  Upon mismatch Getdown updater is downloaded from app server and launched.
+     */
+
+    public void verifyAndUpdateGetdown() throws IOException {
+        final String reqGetdownVersion = _app.getReqGetdownVersion();
+
+        //if required version is not defined or versions equal -> terminate update
+        if (reqGetdownVersion == null ||
+            reqGetdownVersion.equals(VersionUtil.getGetdownVersion())) {
+            return;
+        }
+
+        final Resource getdownUpdater = _app.getGetdownUpdateResource();
+        if (getdownUpdater == null) {
+            return;
+        }
+
+        log.info("Downloading Getdown updater");
+        updateStatus("m.downloading_getdown_update");
+        List<Resource> list = new ArrayList<>();
+        list.add(getdownUpdater);
+        download(list);
+        try {
+            getdownUpdater.install(false);
+        } catch (IOException ioe) {
+            throw new IOException(MessageUtil.compose("m.getdown_update_failed", _ifc.installError),
+                ioe);
+        }
+
+        JOptionPane.showMessageDialog(_status,
+            _msgs.getString("m.notification_of_getdown_update_launch"));
+
+        log.info("launching Getdown updater");
+        updateStatus("m.launching_getdown_update");
+        launchGetdownUpdate(getdownUpdater);
     }
 
     /**
@@ -841,6 +884,24 @@ public abstract class Getdown
         } catch (Exception e) {
             log.warning("launch() failed.", e);
         }
+    }
+
+    /**
+     * Called to launch Getdown updater/installer application.
+     */
+    protected void launchGetdownUpdate(Resource updaterResource)
+    {
+        final List<String> cmdList = new ArrayList<>();
+        //path or update command may contain spaces, which requires for launch command to be wrapped in quotes.
+        cmdList.add(String.format("\"%s\"", updaterResource.getLocal().getAbsolutePath()));
+        cmdList.addAll(_app.getGetdownUpdaterArguments());
+
+        try {
+            new ProcessBuilder().inheritIO().command(cmdList.toArray(new String[0])).start();
+        } catch (IOException e) {
+            log.error(String.format("Failed to Start Client(s) \n %s", e.getCause()));
+        }
+        exit(0);
     }
 
     /**

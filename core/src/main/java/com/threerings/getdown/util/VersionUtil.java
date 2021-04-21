@@ -5,13 +5,7 @@
 
 package com.threerings.getdown.util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -112,6 +106,41 @@ public final class VersionUtil
             return javaVersionProperties.getProperty("JAVA_VERSION");
         } catch (Exception e) {
             log.warning("Failed to read version from custom version file", "file", versionFile, e);
+            return "";
+        }
+    }
+
+    private static final String GETDOWN_VERSION_FILE_NAME = "getdownVersion.properties";
+    /**
+     * @return current running Getdown version. It is retrieved from "getdownVersion.properties",
+     * which is built by Maven during packaging.
+     */
+    public static String getGetdownVersion() {
+        final Properties properties = new java.util.Properties();
+
+        final String javaHome = System.getProperty("java.home");
+        if (javaHome != null) {
+            final File getdownVersionFile = new File(javaHome + File.separator +
+                "conf" + File.separator +  GETDOWN_VERSION_FILE_NAME);
+            if (getdownVersionFile.exists()) {
+                try (InputStream propertyStream = new FileInputStream(getdownVersionFile)) {
+                    properties.load(propertyStream);
+                    final String getdownVersion = properties.getProperty("getdownVersion");
+                    if (getdownVersion != null && !getdownVersion.isEmpty()) {
+                        return getdownVersion;
+                    }
+                } catch (IOException e) {
+                    log.warning("Failed to read Getdown version from 'getdownVersion.properties' " +
+                        "resource file in 'conf' folder ", e);
+                }
+            }
+        }
+        try {
+            final ClassLoader classLoader = VersionUtil.class.getClassLoader();
+            properties.load(classLoader.getResourceAsStream(GETDOWN_VERSION_FILE_NAME));
+            return properties.getProperty("getdownVersion");
+        } catch (IOException e) {
+            log.warning("Failed to read Getdown version from 'getdownVersion.properties' resource file", e);
             return "";
         }
     }
