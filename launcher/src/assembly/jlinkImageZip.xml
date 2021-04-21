@@ -13,5 +13,12 @@
         <include>**</include>
       </includes>
     </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/src/main/jvm-resources</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>**</include>
+      </includes>
+    </fileSet>
   </fileSets>
 </assembly>
