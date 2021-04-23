@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.quaytex.getdown</groupId>
     <artifactId>getdown</artifactId>
-    <version>11.0-SNAPSHOT</version>
+    <version>11.0</version>
   </parent>
 
   <artifactId>getdown-launcher</artifactId>
@@ -98,7 +98,7 @@
         <file><exists>${java.home}/jmods/java.base.jmod</exists></file>
       </activation>
       <properties>
-        <rt.jar.path/>
+        <rt.jar.path />
       </properties>
       <build>
         <plugins>
