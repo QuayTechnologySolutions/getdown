@@ -105,6 +105,7 @@
           <plugin>
             <groupId>com.github.wvengen</groupId>
             <artifactId>proguard-maven-plugin</artifactId>
+            <version>2.3.1</version>
             <configuration>
               <libs>
                 <lib>${java.home}/jmods/java.base.jmod</lib>
@@ -313,6 +314,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.3.0</version>
             <configuration>
               <descriptors>
                 <descriptor>src/assembly/jlinkImageZip.xml</descriptor>
