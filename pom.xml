@@ -136,6 +136,7 @@
               <artifactId>lifecycle-mapping</artifactId>
               <version>1.0.0</version>
               <configuration>
+                <!--
                 <lifecycleMappingMetadata>
                   <pluginExecutions>
                     <pluginExecution>
@@ -153,6 +154,7 @@
                     </pluginExecution>
                   </pluginExecutions>
                 </lifecycleMappingMetadata>
+                -->
               </configuration>
             </plugin>
           </plugins>
