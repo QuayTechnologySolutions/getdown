@@ -40,9 +40,9 @@
   </properties>
 
   <scm>
-    <connection>scm:git:https://github.com/gieza/getdown.git</connection>
-    <developerConnection>scm:git:https://github.com/gieza/getdown.git</developerConnection>
-    <url>https://github.com/gieza/getdown</url>
+    <connection>scm:git:https://github.com/asabanas/getdown.git</connection>
+    <developerConnection>scm:git:https://github.com/asabanas/getdown.git</developerConnection>
+    <url>https://github.com/asabanas/getdown</url>
     <tag>HEAD</tag>
   </scm>
 
