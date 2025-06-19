@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.quaytex.tools</groupId>
     <artifactId>common-parent</artifactId>
-    <version>14</version>
+    <version>19</version>
   </parent>
 
   <groupId>com.quaytex.getdown</groupId>
