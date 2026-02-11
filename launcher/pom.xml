@@ -297,6 +297,8 @@
                   </modulePath>
                   <modules>
                     <module>com.threerings.getdown.launcher</module>
+                    <!-- Elliptic Curve cryptography provider (required for modern TLS/SSL) -->
+                    <module>jdk.crypto.ec</module>
                   </modules>
                   <launcher>
                     <name>GetdownApp</name>
