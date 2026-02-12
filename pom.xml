@@ -10,7 +10,7 @@
   <groupId>com.quaytex.getdown</groupId>
   <artifactId>getdown</artifactId>
   <packaging>pom</packaging>
-  <version>11.6</version>
+  <version>11.7-SNAPSHOT</version>
 
   <name>getdown</name>
   <description>An application installer and updater.</description>
@@ -43,7 +43,7 @@
     <connection>scm:git:https://github.com/QuayTechnologySolutions/getdown.git</connection>
     <developerConnection>scm:git:https://github.com/QuayTechnologySolutions/getdown.git</developerConnection>
     <url>https://github.com/QuayTechnologySolutions/getdown</url>
-    <tag>11.6</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <modules>
