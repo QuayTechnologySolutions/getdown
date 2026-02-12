@@ -19,6 +19,10 @@
     </repository>
   </repositories>
 
+  <properties>
+    <moditect.plugin.version>1.3.0.Final</moditect.plugin.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.quaytex.getdown</groupId>
@@ -195,7 +199,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-jar-plugin</artifactId>
-            <version>3.1.0</version>
+            <version>3.5.0</version>
             <configuration>
               <archive>
                 <manifest>
@@ -225,7 +229,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>3.2.1</version>
+            <version>3.6.1</version>
             <configuration>
               <minimizeJar>true</minimizeJar>
               <createDependencyReducedPom>false</createDependencyReducedPom>
@@ -242,7 +246,7 @@
           <plugin>
             <groupId>org.moditect</groupId>
             <artifactId>moditect-maven-plugin</artifactId>
-            <version>1.0.0.RC1</version>
+            <version>${moditect.plugin.version}</version>
             <executions>
               <execution>
                 <id>add-module-info-to-dependencies</id>
@@ -283,7 +287,7 @@
           <plugin>
             <groupId>org.moditect</groupId>
             <artifactId>moditect-maven-plugin</artifactId>
-            <version>1.0.0.RC1</version>
+            <version>${moditect.plugin.version}</version>
             <executions>
               <execution>
                 <id>create-runtime-image</id>
@@ -297,6 +301,8 @@
                   </modulePath>
                   <modules>
                     <module>com.threerings.getdown.launcher</module>
+                    <!-- Elliptic Curve cryptography provider (required for modern TLS/SSL) -->
+                    <module>jdk.crypto.ec</module>
                   </modules>
                   <launcher>
                     <name>GetdownApp</name>
@@ -307,6 +313,7 @@
                   <noManPages>true</noManPages>
                   <noHeaderFiles>true</noHeaderFiles>
                   <outputDirectory>${project.build.directory}/${jlinkImageDir}</outputDirectory>
+                  <jarInclusionPolicy>NONE</jarInclusionPolicy>
                 </configuration>
               </execution>
             </executions>
@@ -314,7 +321,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>
-            <version>3.3.0</version>
+            <version>3.8.0</version>
             <configuration>
               <descriptors>
                 <descriptor>src/assembly/jlinkImageZip.xml</descriptor>
