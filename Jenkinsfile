@@ -16,6 +16,7 @@ pipeline {
         GIT_CREDENTIALS_ID = 'github-getdown-deploy-key'
         MAVEN_ARGS = "--errors --batch-mode --settings ./maven-settings.xml"
         NEXUS_CREDENTIALS = credentials('nexus-credentials')
+        USERNAME=jenkins-user
     }
 
     stages {
